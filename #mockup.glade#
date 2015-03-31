@@ -277,6 +277,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
           <object class="GtkToolbar" id="toolbarHeaderBar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="show_arrow">False</property>
             <child>
               <object class="GtkToolButton" id="toolbutton1">
                 <property name="visible">True</property>
@@ -310,10 +311,11 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="visible_vertical">False</property>
+                <property name="draw">False</property>
               </object>
               <packing>
                 <property name="expand">True</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -335,6 +337,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="visible_vertical">False</property>
+                <property name="draw">False</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -570,7 +573,7 @@ Actualizado: 23-03-2015</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
-                        <property name="homogeneous">True</property>
+                        <property name="homogeneous">False</property>
                       </packing>
                     </child>
                     <child>
@@ -605,7 +608,7 @@ Actualizado: 23-03-2015</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
