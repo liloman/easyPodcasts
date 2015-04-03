@@ -2,120 +2,6 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
-  <object class="GtkDialog" id="dialogAddGroup">
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Add Group</property>
-    <property name="resizable">False</property>
-    <property name="type_hint">dialog</property>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox1">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area1">
-            <property name="can_focus">False</property>
-            <property name="homogeneous">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label">gtk-apply</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="yalign">0.49000000953674316</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button2">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkFrame" id="frameAddGroup">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">5</property>
-            <property name="margin_right">5</property>
-            <property name="margin_top">5</property>
-            <property name="margin_bottom">5</property>
-            <property name="label_xalign">0</property>
-            <property name="label_yalign">0.62000000476837158</property>
-            <child>
-              <object class="GtkAlignment" id="alignment1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkFixed" id="fixed1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <child>
-                      <object class="GtkLabel" id="label2">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Name</property>
-                      </object>
-                      <packing>
-                        <property name="x">20</property>
-                        <property name="y">26</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="entry1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="can_default">True</property>
-                        <property name="max_length">20</property>
-                        <property name="max_width_chars">6</property>
-                      </object>
-                      <packing>
-                        <property name="x">21</property>
-                        <property name="y">41</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child type="label">
-              <object class="GtkLabel" id="label1">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Add Group</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkListStore" id="liststore1">
     <columns>
       <!-- column-name Musica -->
@@ -277,6 +163,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
           <object class="GtkToolbar" id="toolbarHeaderBar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="show_arrow">False</property>
             <child>
               <object class="GtkToolButton" id="toolbutton1">
                 <property name="visible">True</property>
@@ -307,13 +194,14 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
             </child>
             <child>
               <object class="GtkSeparatorToolItem" id="toolbutton3">
-                <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="visible_vertical">False</property>
+                <property name="draw">False</property>
               </object>
               <packing>
                 <property name="expand">True</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -335,6 +223,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="visible_vertical">False</property>
+                <property name="draw">False</property>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -570,7 +459,7 @@ Actualizado: 23-03-2015</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>
-                        <property name="homogeneous">True</property>
+                        <property name="homogeneous">False</property>
                       </packing>
                     </child>
                     <child>
@@ -605,7 +494,7 @@ Actualizado: 23-03-2015</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="fill">False</property>
                     <property name="position">1</property>
                   </packing>
                 </child>
@@ -626,7 +515,7 @@ Actualizado: 23-03-2015</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkListBox" id="listbox2">
+                      <object class="GtkListBox" id="listboxRSS">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>

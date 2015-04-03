@@ -79,7 +79,7 @@
                       </object>
                       <packing>
                         <property name="x">20</property>
-                        <property name="y">46</property>
+                        <property name="y">26</property>
                       </packing>
                     </child>
                     <child>
@@ -92,7 +92,7 @@
                       </object>
                       <packing>
                         <property name="x">21</property>
-                        <property name="y">61</property>
+                        <property name="y">41</property>
                       </packing>
                     </child>
                   </object>
@@ -141,6 +141,9 @@
 Sinto: "Burning Spear" - The Soulful Strings
 
 Te pinchamos 16 (de 20) enérgicos y vibrantes composiciones del lado más psicodélico de Chess Records!!! "Evil" - Howlin'Wolf; "Another Sugar Daddy" - Bo Diddley; "Tell Mama" - Etta James; "Party Time" - Ramsey Lewis; "Please Newsboy" - Eve Barnum; "Soul Vibrations" - Dorothy Ashby; "More And More" - Little Milton; "Baltimore Oriole" - Lorez Alexandria; "The Way I Feel" - Phil Upchurch; "She Suits Me To A Tee" - Buddy Guy; "You Got It" - Etta James; "I Just Want To Make Love To You" - Muddy Waters; "Mama's Got A Good Thing" - Laura Lee; "The Wailer" - Sonny Cox; "In My Body's House" - Gene Chandler.</property>
+  </object>
+  <object class="GtkTextBuffer" id="textbuffer3">
+    <property name="text" translatable="yes">En palabras de su responsable, el DJ Charlie Fáber, en las sesiones satelitianas se pretende entretener y sorprender con canciones y piezas instrumentales que combinan todo tipo de géneros y músicas: rock con soul, surf con boogaloo, punk y garaje, americana y funk... ¡Todo es posible siempre que se pueda bailar y rockanrrolear!</property>
   </object>
   <object class="GtkTextTagTable" id="texttagtable1"/>
   <object class="GtkTextBuffer" id="textbuffer1">
@@ -244,7 +247,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
               </packing>
             </child>
             <child>
-              <object class="GtkLevelBar" id="levelbarSound">
+              <object class="GtkLevelBar" id="levelbarVolume">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="margin_left">9</property>
@@ -335,7 +338,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
               </object>
               <packing>
                 <property name="expand">True</property>
-                <property name="homogeneous">True</property>
+                <property name="homogeneous">False</property>
               </packing>
             </child>
             <child>
@@ -369,7 +372,7 @@ Se sube al satélite Jaume, el guitarrista de este cuarteto de instrumentales a 
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">True</property>
+            <property name="fill">False</property>
             <property name="position">1</property>
           </packing>
         </child>
@@ -626,6 +629,53 @@ Actualizado: 23-03-2015</property>
                       <object class="GtkListBox" id="listbox2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkListBoxRow" id="listboxrow6">
+                            <property name="width_request">100</property>
+                            <property name="height_request">80</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="activatable">False</property>
+                            <property name="selectable">False</property>
+                            <child>
+                              <object class="GtkBox" id="box7">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkTextView" id="textview6">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="editable">False</property>
+                                    <property name="wrap_mode">word-char</property>
+                                    <property name="justification">center</property>
+                                    <property name="indent">80</property>
+                                    <property name="cursor_visible">False</property>
+                                    <property name="buffer">textbuffer3</property>
+                                    <property name="accepts_tab">False</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkImage" id="image6">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="pixbuf">sateli3.png2</property>
+                                    <property name="pixel_size">86</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
                         <child>
                           <object class="GtkListBoxRow" id="listboxrow1">
                             <property name="width_request">100</property>

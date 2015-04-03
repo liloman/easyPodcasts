@@ -26,7 +26,7 @@ local w = Gtk.Window {
             Gtk.ToolButton {stock_id="gtk-find"},
             Gtk.ToolButton {stock_id="gtk-preferences"},
         },
-        Gtk.Box {
+        hola=Gtk.Box {
             id="boxUpper",
             orientation = 'HORIZONTAL',
             expand=true,
@@ -35,7 +35,7 @@ local w = Gtk.Window {
                 id="boxPodCasts",
                 orientation = 'VERTICAL',
                 expand=false,
-                Gtk.ScrolledWindow {
+                    Gtk.ScrolledWindow {
                     id="scrolledwindowPodcasts",
                     min_content_width = 214,
                     shadow_type = Gtk.ShadowType.IN,
@@ -107,6 +107,8 @@ local w = Gtk.Window {
 -- function w.child.button:on_key_press_event(...) print('keypress', ...) end
 
 w.on_destroy = Gtk.main_quit
+-- listboxPodcasts.insert(Gtk.label("dd"),0)
+-- listboxPodcasts.show_all()
 w:show_all()
 
 Gtk.main()
