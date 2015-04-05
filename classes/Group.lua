@@ -3,8 +3,8 @@ Group=Class("Group")
 
 --Private variable
 local listLocal=nil
-local listRSSSelected=nil
-local LB=builder:get_object('listboxPodcasts')
+local listRSSSelectedRow=nil
+local LB=builder:get_object('listboxRSS')
 
 function Group:initialize(name)
     self.name=name
@@ -30,19 +30,20 @@ function Group:Update(groupName,rss)
     if not found then 
         print("not found")
         listLocal=Gtk.ListBox()
-        local label=Gtk.Label()
-        label:set_label(rss)
-        if rss~='' then listLocal:insert(label,-1) end
         group=Gtk.Expander()
         group:set_label(groupName)
         group:add(listLocal)
-        function group:on_activate() listRSSSelected=self:get_child() end
-        function listLocal:on_row_activated() listRSSSelected=self end
+        function group:on_activate() listRSSSelectedRow=self:get_child() end
+        function listLocal:on_row_activated() 
+            local id=string.sub(self:get_selected_row():get_child():get_name(),string.len("idrss_")+1)
+            podcast:ShowSelectedRSS(id)
+            listRSSSelectedRow=self 
+        end
         LB:insert(group,-1)
     end
     --Create its RSS
-    for rss,img in db:select("SELECT rss,img from listRSSGroups where groupName='"..groupName.."'") do
-        self:UpdateRSS(rss,img)
+    for rss,img,id in db:select("SELECT rss,img,id from listRSSGroups where groupName='"..groupName.."'") do
+        self:UpdateRSS(rss,img,id)
     end
 end
 
@@ -57,9 +58,10 @@ end
 --     return pwd
 -- end
 
-function Group:UpdateRSS(rss,img)
+function Group:UpdateRSS(rss,img,id)
     print("adding "..rss.." with "..img)
     local hbox=Gtk.HBox()
+    hbox:set_name("idrss_"..id)
     local label=Gtk.Label()
     label:set_label(rss)
     local image=Gtk.Image()
@@ -91,7 +93,7 @@ function Group:AddGroup()
 
     function entry:on_activate() updateGroup(self.text) end
     function entry:on_focus_out_event() updateGroup(self.text) end
-    function group:on_activate() listRSSSelected=self:get_child() end
+    function group:on_activate() listRSSSelectedRow=self:get_child() end
 
     local listLocal=Gtk.ListBox()
     group:set_label_widget(entry)
@@ -103,7 +105,7 @@ end
 
 function Group:DelGroup()
     local count=0
-    for _,_ in ipairs(listRSSSelected:get_children()) do
+    for _,_ in ipairs(listRSSSelectedRow:get_children()) do
         count=count+1
     end
     if count~=0 then return end
@@ -115,7 +117,7 @@ end
 
 
 function Group:AddRSS()
-    if listRSSSelected==nil then return end
+    if listRSSSelectedRow==nil then return end
     print("si seleccionado")
     local builder = Gtk.Builder()
     assert(builder:add_from_file('dialogAddRSS.ui'))
@@ -127,7 +129,6 @@ function Group:AddRSS()
 
     local buttonOk=builder:get_object('buttonOk')
     function buttonOk:on_clicked()
-        local iconPath=os.getenv("HOME")..'/.config/easyPodcasts/icons/'
         local rssName=builder:get_object('name'):get_text()
         local desc=builder:get_object('desc'):get_text()
         local url=builder:get_object('url'):get_text()
@@ -160,7 +161,7 @@ function Group:AddRSS()
         db:sql("insert into rss(name,desc,url,img) values ('"..rssName.."','"..desc.."','"..url.."','"..filename.."')") 
         local res=db:select("select max(id) max from RSS") 
         local idrss=res()
-        local groupName=listRSSSelected:get_parent():get_label()
+        local groupName=listRSSSelectedRow:get_parent():get_label()
         local res=db:select("select id from Groups where name='"..groupName.."'") 
         local idgroup=res()
         db:sql("insert into RSSGroups(idGroup,idRSS) values ("..idgroup..","..idrss..")") 
@@ -170,15 +171,15 @@ function Group:AddRSS()
 end
 
 function Group:DelRSS()
-    if listRSSSelected==nil then return end
-    if listRSSSelected:get_selected_row()==nil then return end
-    local rss=listRSSSelected:get_selected_row():get_child().child[2]:get_text()
-    local group=listRSSSelected:get_parent():get_label()
-    listRSSSelected:get_selected_row():destroy()
+    if listRSSSelectedRow==nil then return end
+    if listRSSSelectedRow:get_selected_row()==nil then return end
+    local rss=listRSSSelectedRow:get_selected_row():get_child().child[2]:get_text()
+    local group=listRSSSelectedRow:get_parent():get_label()
+    listRSSSelectedRow:get_selected_row():destroy()
     print("Deleting rss "..rss)
     local res=db:select("select id from RSS where name='"..rss.."'") 
     local idrss=res()
-    local group=listRSSSelected:get_parent():get_label()
+    local group=listRSSSelectedRow:get_parent():get_label()
     local res=db:select("select id from Groups where name='"..group.."'") 
     local idgroup=res()
     db:sql("delete from RSSGroups where idGroup="..idgroup.." and idRSS="..idrss) 
