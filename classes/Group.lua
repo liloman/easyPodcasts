@@ -42,33 +42,21 @@ function Group:Update(groupName,rss)
         LB:insert(group,-1)
     end
     --Create its RSS
-    for rss,img,id in db:select("SELECT rss,img,id from listRSSGroups where groupName='"..groupName.."'") do
-        self:UpdateRSS(rss,img,id)
+    for rss,id in db:select("SELECT rss,id from listRSSGroups where groupName='"..groupName.."'") do
+        self:UpdateRSS(rss,id)
     end
 end
 
--- local function currentDir()
---     local file_name = debug.getinfo(1).short_src
---     local p = io.popen("dirname $(readlink -f " .. file_name .. ")")
---     local pwd
---     if p then
---         pwd = p:read("*l").."/"
---         p:close()
---     end
---     return pwd
--- end
-
-function Group:UpdateRSS(rss,img,id)
-    print("adding "..rss.." with "..img)
+function Group:UpdateRSS(rss,id)
+    print("adding "..rss)
     local hbox=Gtk.HBox()
     hbox:set_name("idrss_"..id)
     local label=Gtk.Label()
-    label:set_label(rss)
-    local image=Gtk.Image()
-    -- local path=currentDir().."../icons/sateli3.png"
-    image.new_from_resource(img)
-    hbox:pack_start(image, false, false, 0)
+    label:set_label(id)
     hbox:pack_start(label, false, false, 0)
+    local label=Gtk.Label()
+    label:set_label(rss)
+    hbox:pack_end(label, false, false, 0)
     listLocal:insert(hbox,-1)
     LB:show_all()
 end
@@ -118,7 +106,6 @@ end
 
 function Group:AddRSS()
     if listRSSSelectedRow==nil then return end
-    print("si seleccionado")
     local builder = Gtk.Builder()
     assert(builder:add_from_file('dialogAddRSS.ui'))
     local window = builder.objects.windowRSS
@@ -130,42 +117,23 @@ function Group:AddRSS()
     local buttonOk=builder:get_object('buttonOk')
     function buttonOk:on_clicked()
         local rssName=builder:get_object('name'):get_text()
-        local desc=builder:get_object('desc'):get_text()
         local url=builder:get_object('url'):get_text()
-
-        local getPath=function(str,sep)
-            sep=sep or'/'
-            return str:match("(.*"..sep..")")
-        end
-
         if rssName=="" then builder:get_object('name'):grab_focus() return end
         if url=="" then builder:get_object('url'):grab_focus() return end
-        local iconChooser=builder:get_object('iconchooser')
-        local currentFilename=iconChooser:get_filename()
-        local filename=""
 
-        if currentFilename then
-            --get_uri works for last selected also
-            local currentPath=getPath(iconChooser:get_uri())
-            if currentPath~="file://"..iconPath then
-                local cmd="mkdir -p '"..iconPath.."'"
-                os.execute(cmd)
-                local cmd="cp -v '"..currentFilename.."' '"..iconPath.."'"
-                os.execute(cmd)
-            end
-            if currentFilename then
-                filename=iconPath..string.sub(currentFilename,string.len(currentPath)-6) 
-            end
-        end
-
-        db:sql("insert into rss(name,desc,url,img) values ('"..rssName.."','"..desc.."','"..url.."','"..filename.."')") 
+        db:sql("insert into rss(name,url) values ('"..rssName.."','"..url.."')") 
         local res=db:select("select max(id) max from RSS") 
         local idrss=res()
         local groupName=listRSSSelectedRow:get_parent():get_label()
         local res=db:select("select id from Groups where name='"..groupName.."'") 
         local idgroup=res()
         db:sql("insert into RSSGroups(idGroup,idRSS) values ("..idgroup..","..idrss..")") 
-        Group:Update(groupName,rssName)
+        Group:UpdateRSS(rssName,idrss)
+        -- local ref = match.url:match( "([^/]+)$" )
+        -- local pathImg=iconpath..idrss..ref
+        -- os.execute("mkdir -p '"..iconPath..idrss.."'")
+        -- os.execute("/usr/bin/wget -nc "..match.url.." -O "..iconpath..idrss.."  &")
+        -- db:sql("update rss(img) values ('"..pathImg.."') where id="..idrss) 
     end
     window:show_all()
 end
@@ -182,9 +150,13 @@ function Group:DelRSS()
     local group=listRSSSelectedRow:get_parent():get_label()
     local res=db:select("select id from Groups where name='"..group.."'") 
     local idgroup=res()
-    db:sql("delete from RSSGroups where idGroup="..idgroup.." and idRSS="..idrss) 
     db:sql("delete from RSS where id="..idrss) 
+    db:sql("delete from Podcasts where idRSS="..idrss) 
+    db:sql("delete from RSSGroups where idGroup="..idgroup.." and idRSS="..idrss) 
+    --Delete downloaded?
+    os.execute("rm -rf '"..audioPath..idrss.."'")
     LB:show_all()
 end
+
 
 return Group
