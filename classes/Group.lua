@@ -2,7 +2,6 @@ local Class=require("classes.Class")
 Group=Class("Group")
 
 --Private variable
-local listLocal=nil
 local listRSSSelectedRow=nil
 local LB=builder:get_object('listboxRSS')
 
@@ -20,9 +19,9 @@ end
 
 function Group:Update(groupName,rss)
     local found=false
+    local listLocal=nil
     for _,child in ipairs(LB:get_children()) do
         if child:get_child():get_label() == groupName then 
-            listLocal=child:get_child():get_child()
             found=true 
         end
     end
@@ -33,7 +32,8 @@ function Group:Update(groupName,rss)
         group=Gtk.Expander()
         group:set_label(groupName)
         group:add(listLocal)
-        function group:on_activate() listRSSSelectedRow=self:get_child() end
+        listRSSSelectedRow=listLocal
+        function group:on_activate() print("activate"..self:get_label()) listRSSSelectedRow=self:get_child() end
         function listLocal:on_row_activated() 
             local id=string.sub(self:get_selected_row():get_child():get_name(),string.len("idrss_")+1)
             podcast:ShowSelectedRSS(id)
@@ -57,7 +57,7 @@ function Group:UpdateRSS(rss,id)
     local label=Gtk.Label()
     label:set_label(rss)
     hbox:pack_end(label, false, false, 0)
-    listLocal:insert(hbox,-1)
+    listRSSSelectedRow:insert(hbox,-1)
     LB:show_all()
 end
 
@@ -66,6 +66,7 @@ function Group:AddGroup()
     local group=Gtk.Expander()
     local entry=Gtk.Entry()
     local clicked=false
+    local listLocal=nil
     entry:set_text("undefined")
 
     local function updateGroup(text)
@@ -81,17 +82,18 @@ function Group:AddGroup()
 
     function entry:on_activate() updateGroup(self.text) end
     function entry:on_focus_out_event() updateGroup(self.text) end
-    function group:on_activate() listRSSSelectedRow=self:get_child() end
-
-    local listLocal=Gtk.ListBox()
+    function group:on_activate() print("activate"..self:get_label()) listRSSSelectedRow=self:get_child() end
+    listLocal=Gtk.ListBox()
     group:set_label_widget(entry)
     group:add(listLocal)
+    listRSSSelectedRow=listLocal
     LB:insert(group,0)
     LB:show_all()
     entry:grab_focus()
 end
 
 function Group:DelGroup()
+    if listRSSSelectedRow==nil then return end
     local count=0
     for _,_ in ipairs(listRSSSelectedRow:get_children()) do
         count=count+1

@@ -1,4 +1,4 @@
-#!/usr/bin/lua
+#!/usr/bin/env lua
 abDir=arg[0]:match("(.*/)")
 package.path = package.path .. ';'..abDir..'?.lua;'
 local lgi = require 'lgi'
