@@ -12,7 +12,6 @@ local window = builder.objects.mainWindow
 local Group=require("classes.Group")
 local Podcast=require("classes.Podcast")
 
---Start the sound server if not running 
 
 EASYPATH=os.getenv("HOME")..'/.config/easyPodcasts/'
 iconPath=EASYPATH..'icons/'
@@ -20,7 +19,8 @@ audioPath=EASYPATH..'audio/'
 
 --Dont sync with other clients the playlist by default
 mocp="/usr/bin/mocp -n "
---Start the server and go to music dir
+--Start the sound server if not running 
+-- and go to music dir
 os.execute(mocp.."-S -m "..audioPath)
 
 local group=Group:new()
@@ -63,6 +63,7 @@ function button:on_toggled()  builder:get_object('boxRSS'):set_visible(self:get_
 function window:on_destroy()
     Gtk.main_quit()
     db:close()
+    mpd:close()
 end
 
 window:show_all()

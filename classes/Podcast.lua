@@ -1,6 +1,8 @@
 local Class=require("classes.Class")
 Podcast=Class("Podcast")
 
+local Mpd=require("classes.mpd")
+
 local tags={title = true, link=true }
 local title, link, url, summary 
 local imgURL, description
@@ -51,7 +53,7 @@ callbacksItems = {
 --Private variables
 local LB=builder:get_object('listboxPodcasts')
 local selectedRSS=nil
-local play={ }
+local play={}
 local lxp=require("lxp")
 
 function Podcast:initialize(name)
@@ -64,6 +66,9 @@ function Podcast:initialize(name)
         local elements=box:get_children()
         play.title=elements[1]:get_label()
     end
+    local mpd=Mpd:new()
+    local stats=mpd:stats()
+    for k,v in pairs(stats) do print("statsss:",k,v) end
 end
 
 function Podcast:InsertPodcast(_title,_link,_url,_summary)
