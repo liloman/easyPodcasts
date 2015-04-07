@@ -10,7 +10,7 @@ function Db:new()
     -- create environment object
     env = assert (luasql.sqlite3())
     -- connect to data source
-    con = assert(env:connect("db/easyPodcasts.sqlite"))
+    con = assert(env:connect(abDir.."db/easyPodcasts.sqlite"))
     return obj
 end
 

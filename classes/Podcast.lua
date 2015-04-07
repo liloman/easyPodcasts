@@ -1,4 +1,4 @@
-local Class=require("Class")
+local Class=require("classes.Class")
 Podcast=Class("Podcast")
 
 local tags={title = true, link=true }

@@ -1,4 +1,4 @@
-local Class=require("Class")
+local Class=require("classes.Class")
 Group=Class("Group")
 
 --Private variable
@@ -107,7 +107,7 @@ end
 function Group:AddRSS()
     if listRSSSelectedRow==nil then return end
     local builder = Gtk.Builder()
-    assert(builder:add_from_file('dialogAddRSS.ui'))
+    assert(builder:add_from_file((abDir..'ui/dialogAddRSS.ui')))
     local window = builder.objects.windowRSS
     local buttonCancel=builder:get_object('buttonCancel')
     function buttonCancel:on_clicked()

@@ -1,11 +1,13 @@
-package.path = package.path .. ';classes/?.lua'
+#!/usr/bin/lua
+abDir=arg[0]:match("(.*/)")
+package.path = package.path .. ';'..abDir..'?.lua;'
 local lgi = require 'lgi'
 local assert = lgi.assert
 Gtk = lgi.Gtk
-db=require("db.db")
+db=require("classes.db")
 
 builder = Gtk.Builder()
-assert(builder:add_from_file(('limpio.ui')))
+assert(builder:add_from_file((abDir..'ui/limpio.ui')))
 local window = builder.objects.mainWindow
 local Group=require("classes.Group")
 local Podcast=require("classes.Podcast")
