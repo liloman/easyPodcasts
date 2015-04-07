@@ -71,9 +71,10 @@ function Podcast:InsertPodcast(_title,_link,_url,_summary)
     local idrss=selectedRSS
     local res=db:select("select ref from Podcasts where ref="..ref.." and idRSS="..idrss)
     if not res() then
-        local pre = (_title.."-"):gmatch("([^-]*)-") 
-        local title = db:escape(pre(3))
-        local date = pre(4)
+        local res={}
+        for w in (_title.."-"):gmatch("([^-]*)-") do table.insert(res,w) end
+        local title = db:escape(res[2])
+        local date = res[3]
         db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking) values ("..ref..","..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0)")
         self:AddPodcastToLB(title,_url,summary,true)
     end
