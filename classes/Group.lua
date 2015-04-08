@@ -43,11 +43,11 @@ function Group:Update(groupName,rss)
     end
     --Create its RSS
     for rss,id in db:select("SELECT rss,id from listRSSGroups where groupName='"..groupName.."'") do
-        self:UpdateRSS(rss,id)
+        self:AddRSSToLB(rss,id)
     end
 end
 
-function Group:UpdateRSS(rss,id)
+function Group:AddRSSToLB(rss,id)
     print("adding "..rss)
     local hbox=Gtk.HBox()
     hbox:set_name("idrss_"..id)
@@ -130,12 +130,10 @@ function Group:AddRSS()
         local res=db:select("select id from Groups where name='"..groupName.."'") 
         local idgroup=res()
         db:sql("insert into RSSGroups(idGroup,idRSS) values ("..idgroup..","..idrss..")") 
-        Group:UpdateRSS(rssName,idrss)
-        -- local ref = match.url:match( "([^/]+)$" )
-        -- local pathImg=iconpath..idrss..ref
-        -- os.execute("mkdir -p '"..iconPath..idrss.."'")
-        -- os.execute("/usr/bin/wget -nc "..match.url.." -O "..iconpath..idrss.."  &")
-        -- db:sql("update rss(img) values ('"..pathImg.."') where id="..idrss) 
+        Group:AddRSSToLB(rssName,idrss)
+        local path=audioPath..idrss.."/"
+        os.execute("mkdir -p  "..path)
+        podcast:SetSelected(idrss)
     end
     window:show_all()
 end

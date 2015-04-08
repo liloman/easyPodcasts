@@ -2,7 +2,17 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkAdjustment" id="progressAdjust">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkTextBuffer" id="textbufferHeaderPodcasts"/>
+  <object class="GtkAdjustment" id="volumeAdjust">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkWindow" id="mainWindow">
     <property name="width_request">769</property>
     <property name="height_request">430</property>
@@ -79,14 +89,37 @@
               </packing>
             </child>
             <child>
-              <object class="GtkProgressBar" id="progressbarSong">
+              <object class="GtkBox" id="box2">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_top">15</property>
-                <property name="margin_bottom">13</property>
-                <property name="text" translatable="yes">titulo podcast</property>
-                <property name="show_text">True</property>
-                <property name="ellipsize">middle</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="titleSong">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes"> </property>
+                    <property name="justify">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale" id="scaleSong">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="adjustment">progressAdjust</property>
+                    <property name="round_digits">2</property>
+                    <property name="digits">2</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -95,21 +128,41 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLevelBar" id="levelbarVolume">
+              <object class="GtkVolumeButton" id="volumebutton">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_left">9</property>
-                <property name="margin_right">9</property>
-                <property name="margin_top">37</property>
-                <property name="margin_bottom">6</property>
-                <property name="value">50</property>
-                <property name="max_value">100</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="relief">none</property>
+                <property name="focus_on_click">False</property>
+                <property name="orientation">vertical</property>
+                <property name="value">100</property>
+                <property name="adjustment">volumeAdjust</property>
+                <property name="icons">audio-volume-muted-symbolic
+audio-volume-high-symbolic
+audio-volume-low-symbolic
+audio-volume-medium-symbolic</property>
+                <child internal-child="plus_button">
+                  <object class="GtkButton" id="volumebutton-plus_button1">
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="relief">none</property>
+                  </object>
+                </child>
+                <child internal-child="minus_button">
+                  <object class="GtkButton" id="volumebutton-minus_button1">
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="relief">none</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">8</property>
-                <property name="pack_type">end</property>
+                <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
             </child>

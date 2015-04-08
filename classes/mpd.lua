@@ -49,6 +49,7 @@ function MPD:connect(host, port, reconnect)
    local host, port = host or "localhost", port or 6600
    if not reconnect then reconnect = true end
    self.con, self.err=assert(socket.connect(host, port))
+   if self.con then self.err="Ok" end
    assert(self.con)
    self.reconnect=reconnect
    self.host=host
@@ -170,6 +171,7 @@ end
 ---Get table with status.
 function MPD:status() return self:sendrecv("status", "table") end
 
+
 ---Get table with stats.
 function MPD:stats() return self:sendrecv("stats", "table") end
 
@@ -236,6 +238,11 @@ end
 
 ---Unpause.
 function MPD:unpause() return self:pause(false) end
+
+---Toggle between pause and unpause
+function MPD:toggle()
+    return self:sendrecv("pause")
+end
 
 ---Begins playing the playlist at song number SONGPOS.
 function MPD:play(songpos)
