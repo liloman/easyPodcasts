@@ -46,13 +46,16 @@ function button:on_clicked() group:DelRSS() end
 
 local button=builder:get_object('switchUpdateRSS')
 function button:on_state_set() 
+    local selected=podcast:GetSelected()
+    if not selected then return end
     if not button.state then
         podcast:ParsePodcasts() 
-            db:sql("update RSS set autoupdate=1 where id="..podcast:GetSelected())
+        db:sql("update RSS set autoupdate=1 where id="..selected)
     else
-        db:sql("update RSS set autoupdate=0 where id="..podcast:GetSelected())
+        db:sql("update RSS set autoupdate=0 where id="..selected)
     end 
 end
+
 
 local button=builder:get_object('toolbuttonPlayPause')
 function button:on_clicked() podcast:Play() end

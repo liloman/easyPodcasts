@@ -14,6 +14,8 @@ local LB=builder:get_object('listboxPodcasts')
 local titleSong = builder:get_object('titleSong')
 local barSong = builder:get_object('progressAdjust')
 local barVolume = builder:get_object('volumeAdjust')
+local bufferHeader=builder:get_object('textbufferHeaderPodcasts')
+local switchHeader=builder:get_object('switchUpdateRSS')
 
 callbacksChannel = {
     StartElement = function (parser, name, attr)
@@ -23,16 +25,14 @@ callbacksChannel = {
             end
         end
         if name == "itunes:image" then imgURL=attr.href end
-    end,
-    EndElement = function (parser, name)
-        if name == "image" then 
+        if name == "item" then 
             callbacksChannel.CharacterData = false
             callbacksChannel.StartElement = false
-            Podcast:InsertHeader(imgURL,description)
+            Podcast:UpdateHeader()
         end
     end,
+    EndElement = false,
     CharacterData = false
-
 }
 
 callbacksItems = {
@@ -60,16 +60,22 @@ callbacksItems = {
 
 --Private variables
 local LB=builder:get_object('listboxPodcasts')
-local selectedRssId=nil
+local selectedRssId
 local play={}
 local lxp=require("lxp")
 
+local function scaleImage(img)
+    local image=builder:get_object('imageHeaderPodcasts')
+    image:clear()
+    image:set_from_file(img)
+    local scaled = image:get_pixbuf():scale_simple(150,150,1)
+    image:set_from_pixbuf(scaled)
+end
 
 function Podcast:initialize(name)
     self.name=name
     function LB:on_row_selected()
         --maybe we did row:destroy() before to get here
-        print("selected..")
         if not LB:get_selected_row() then return end
         local box=LB:get_selected_row():get_child()
         play.url=box:get_name()
@@ -77,7 +83,6 @@ function Podcast:initialize(name)
         play.title=elements[1]:get_label()
         play.idpodcast=elements[1]:get_name()
         play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
-        print("selected:title.."..play.title.."url:"..play.url.."path:"..play.path)
         if play.playing then print("playing:"..play.playing) end
     end
     --if started when player working
@@ -106,33 +111,34 @@ function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
         local res=db:select("SELECT max(id) from Podcasts")
         self:AddPodcastToLB(res(),title,_url,summary,bAddFirst)
     end
-   
+
 end
 
+
 function Podcast:ShowSelectedRSS(idRSS)
-    local buffer=builder:get_object('textbufferHeaderPodcasts')
-    local switch=builder:get_object('switchUpdateRSS')
+    if not idRSS then return end
     selectedRssId=idRSS
-    --Reset everything
-    switch:set_state(false)
-    buffer:set_text('',0)
+    --Reset LB only
     for _,child in ipairs(LB:get_children()) do child:destroy() end
-    for desc,img,auto in db:select("SELECT desc,img,autoupdate from RSS where id="..idRSS) do
-        buffer:set_text(desc,string.len(desc))
-        switch:set_state(auto==1)
-        --Aqui iría la imagen...
-    end
+    local res=db:select("SELECT desc,img,autoupdate from RSS where id="..idRSS) 
+    local _desc,img,auto = res()
+    bufferHeader:set_text(_desc,string.len(_desc))
+    switchHeader:set_active(auto==1)
+    scaleImage(img)
     local sql="SELECT id,title,url,desc from Podcasts where idRSS="..idRSS.." order by date desc"
     for id,title,link,desc in db:select(sql) do
         self:AddPodcastToLB(id,title,link,desc,false)
     end
-    if builder:get_object('switchUpdateRSS').state then self:ParsePodcasts() end
 end
 
 function Podcast:ParsePodcasts()
+    if not selectedRssId then return end
     local res=db:select("select count() from Podcasts where idRSS="..selectedRssId)
     --To add first or last on LB
     bAddFirst = res() ~= 0 
+    local res=db:select("select url from RSS where id="..selectedRssId)
+    local url=res()
+    os.execute(wget.." "..url.." -O /tmp/file.rss -o /tmp/wgetparse.log")
     self:ParsePodcast(callbacksChannel)
     self:ParsePodcast(callbacksItems)
 end
@@ -141,9 +147,6 @@ function Podcast:ParsePodcast(callbacks)
     if not selectedRssId then return end
     -- local p = lxp.new(callbacks)
     local p = lxp.new(callbacks)
-    local res=db:select("select url from RSS where id="..selectedRssId)
-    local url=res()
-    os.execute(wget.." "..url.." -O /tmp/file.rss -o /tmp/wgetparse.log")
     local file=io.open("/tmp/file.rss","r")
     line = file:read("*l")
     while line do 
@@ -257,13 +260,15 @@ function Podcast:Previous()
     end
 end
 
-function Podcast:InsertHeader(imgURL,description)
-    if not selectedRssId then return end
+function Podcast:UpdateHeader()
+    -- if not selectedRssId then return end
     local ref = iconPath..imgURL:match("([^/]+)%.jpg")..".jpg"
-    local buffer=builder:get_object('textbufferHeaderPodcasts')
     os.execute(wget.." "..imgURL.." -nc -O "..ref.." -o /tmp/.wgeticon.log &")
     db:sql("update RSS set desc='"..description.."', img='"..ref.."' where id="..selectedRssId)
-    buffer:set_text(description,string.len(description))
+    bufferHeader:set_text(description,string.len(description))
+    scaleImage(ref)
+    imgURL=nil
+    description=nil
 end
 
 function Podcast:GetSelected()
