@@ -122,9 +122,11 @@ function Podcast:ShowSelectedRSS(idRSS)
     for _,child in ipairs(LB:get_children()) do child:destroy() end
     local res=db:select("SELECT desc,img,autoupdate from RSS where id="..idRSS) 
     local _desc,img,auto = res()
-    bufferHeader:set_text(_desc,string.len(_desc))
-    switchHeader:set_active(auto==1)
-    scaleImage(img)
+    if _desc then 
+        bufferHeader:set_text(_desc,string.len(_desc))
+        switchHeader:set_active(auto==1)
+        scaleImage(img)
+    end
     local sql="SELECT id,title,url,desc from Podcasts where idRSS="..idRSS.." order by date desc"
     for id,title,link,desc in db:select(sql) do
         self:AddPodcastToLB(id,title,link,desc,false)
@@ -209,10 +211,12 @@ function Podcast:Play()
     play.playing=play.path
     button:set_icon_name("media-playback-pause")
     local status=audio:Status()
-    local total=tonumber(status.time:match(".*:(%d+)"))
-    barSong:set_upper(total/60)
-    local volume=tonumber(status.volume)
-    if volume>0 then barVolume:set_value(volume) end
+    if status.volume then
+        -- local total=tonumber(status.time:match(".*:(%d+)"))
+        -- barSong:set_upper(total/60)
+        local volume=tonumber(status.volume)
+        if volume>0 then barVolume:set_value(volume) end
+    end
 end
 
 function Podcast:Forward()
@@ -286,8 +290,15 @@ end
 function Podcast:UpdateBar()
     if audio:Playing() then 
         local status=audio:Status()
-        local played=tonumber(status.elapsed)
-        barSong:set_value(played/60)
+        local current=audio:CurrentSong()
+        if current.Time then 
+            audio:Update(current.file)
+            local played=tonumber(status.elapsed)
+            barSong:set_value(played/60)
+            -- local total=tonumber(status.time:match(".*:(%d+)"))
+            local total=tonumber(current.Time)
+            barSong:set_upper(total/60)
+        end
     end
 end
 

@@ -32,6 +32,10 @@ function Audio:Play(song)
     end
 end
 
+function Audio:Update(song)
+    player:update(song)
+end
+
 function Audio:TogglePause()
     player:toggle()
 end
