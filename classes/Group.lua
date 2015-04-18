@@ -12,6 +12,7 @@ end
 
 
 function Group:UpdateAll()
+    for _,child in ipairs(LB:get_children()) do child:destroy() end
     for group in db:select("SELECT name from Groups") do
         self:Update(group,'')
     end
@@ -21,9 +22,7 @@ function Group:Update(groupName,rss)
     local found=false
     local listLocal=nil
     for _,child in ipairs(LB:get_children()) do
-        if child:get_child():get_label() == groupName then 
-            found=true 
-        end
+        if child:get_child():get_label()  == groupName then found=true end
     end
     --Create the group (GtkExpander)
     if not found then 
@@ -33,7 +32,11 @@ function Group:Update(groupName,rss)
         group:set_label(groupName)
         group:add(listLocal)
         listRSSSelectedRow=listLocal
-        function group:on_activate() print("activate"..self:get_label()) listRSSSelectedRow=self:get_child() end
+        function group:on_activate() 
+            print("activate"..self:get_label()) 
+            listRSSSelectedRow=self:get_child() 
+        end
+
         function listLocal:on_row_activated() 
             local id=string.sub(self:get_selected_row():get_child():get_name(),string.len("idrss_")+1)
             podcast:ShowSelectedRSS(id)
@@ -157,6 +160,7 @@ function Group:DelRSS()
     os.execute("rm -rf '"..audioPath..idrss.."'")
     LB:show_all()
 end
+
 
 
 return Group

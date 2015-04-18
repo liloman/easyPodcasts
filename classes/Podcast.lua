@@ -6,6 +6,7 @@ local socket=require("socket")
 local Audio=require("classes.Audio")
 local audio=Audio:new("mpd")
 
+--Private variables
 local tags={pubDate = true, title = true, link=true }
 local title, link, url, summary , date
 local imgURL, description
@@ -14,9 +15,12 @@ local LB=builder:get_object('listboxPodcasts')
 local titleSong = builder:get_object('titleSong')
 local barSong = builder:get_object('progressAdjust')
 local barVolume = builder:get_object('volumeAdjust')
+local boxHeader=builder:get_object('boxHeaderPodcasts')
 local bufferHeader=builder:get_object('textbufferHeaderPodcasts')
 local switchHeader=builder:get_object('switchUpdateRSS')
-
+local imageHeader=builder:get_object('imageHeaderPodcasts')
+local selectedRssId=nil
+    
 callbacksChannel = {
     StartElement = function (parser, name, attr)
         callbacksChannel.CharacterData = function (parser,str)
@@ -58,23 +62,32 @@ callbacksItems = {
 }
 
 
---Private variables
-local LB=builder:get_object('listboxPodcasts')
-local selectedRssId
-local play={}
 local lxp=require("lxp")
 
 local function scaleImage(img)
-    local image=builder:get_object('imageHeaderPodcasts')
-    image:clear()
-    image:set_from_file(img)
-    local scaled = image:get_pixbuf():scale_simple(150,150,1)
-    image:set_from_pixbuf(scaled)
+    imageHeader:clear()
+    imageHeader:set_from_file(img)
+    if imageHeader:get_pixbuf() then
+        local scaled = imageHeader:get_pixbuf():scale_simple(150,150,1)
+        imageHeader:set_from_pixbuf(scaled)
+    end
+end
+
+local function download()
+        print("wget "..play.url)
+        os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
+        --Let's wait some time to download something
+        socket.sleep(10)
+        --0 not downloaded, 1 downloading, 2 downloaded?
+        db:sql("update Podcasts set downloaded=1 where id="..play.idpodcast)
 end
 
 function Podcast:initialize(name)
     self.name=name
     function LB:on_row_selected()
+        print("selected podcast in podcast mode?")
+        if playlistmode() then return end
+        print("selected podcast in podcast mode")
         --maybe we did row:destroy() before to get here
         if not LB:get_selected_row() then return end
         local box=LB:get_selected_row():get_child()
@@ -85,16 +98,16 @@ function Podcast:initialize(name)
         play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
         if play.playing then print("playing:"..play.playing) end
     end
-    --if started when player working
-    if audio:Playing() then 
-        local current=audio:CurrentSong()
-        play.path=audioPath..current.file
-        play.playing=play.path
-        play.url=play.playing
-        titleSong:set_label(current.Title)
-        local button=builder:get_object('toolbuttonPlayPause')
-        button:set_icon_name("media-playback-pause")
-    end
+    -- --if started when player working
+    -- if audio:Playing() then 
+    --     local current=audio:CurrentSong()
+    --     play.path=audioPath..current.file
+    --     play.playing=play.path
+    --     play.url=play.playing
+    --     titleSong:set_label(current.Title)
+    --     local button=builder:get_object('toolbuttonPlayPause')
+    --     button:set_icon_name("media-playback-pause")
+    -- end
 end
 
 function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
@@ -117,9 +130,13 @@ end
 
 function Podcast:ShowSelectedRSS(idRSS)
     if not idRSS then return end
+    boxHeader:set_visible(true)
     selectedRssId=idRSS
-    --Reset LB only
+    --Reset everything
+    imageHeader:clear()
+    bufferHeader:set_text('',0)
     for _,child in ipairs(LB:get_children()) do child:destroy() end
+
     local res=db:select("SELECT desc,img,autoupdate from RSS where id="..idRSS) 
     local _desc,img,auto = res()
     if _desc then 
@@ -181,34 +198,45 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
 
 end
 
-function Podcast:Play()
+function Podcast:Play(playlist)
+    print("play")
     if not play.url then return end
     local button=builder:get_object('toolbuttonPlayPause')
     if play.playing and play.path==play.playing then 
+        local relPath=play.path:match(".*/([%d]+/.*mp3)")
+        --If it's not added cause downloading to slow
+        if not audio:CurrentSong().Time then audio:PlayDownloading(relPath) end
+        --Maybe even now not playing already so wait more 
+        if not audio:CurrentSong().Time then return end
         if button:get_icon_name() == "media-playback-start" then
-            button:set_icon_name("media-playback-pause")
-        else
-            button:set_icon_name("media-playback-start")
-        end
+            button:set_icon_name("media-playback-pause") 
+        else button:set_icon_name("media-playback-start") end
         --Toggle between Play and Pause
         audio:TogglePause()
+        print("sale de ajuste del boton")
         return
     end 
+    print("play2")
     local res=db:select("select listened,downloaded from Podcasts where id="..play.idpodcast)
     local listened,downloaded=res()
-    titleSong:set_label(play.title)
-    if downloaded==0 then
-        print("wget "..play.url)
-        os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
-        --Let's wait some time to download something
-        socket.sleep(2)
-        db:sql("update Podcasts set downloaded=1 where id="..play.idpodcast)
-    end
     local listened = listened + 1
+    titleSong:set_label(play.title)
     db:sql("update Podcasts set listened="..listened.." where id="..play.idpodcast)
+    if downloaded==0 then download() end
     local relPath=play.path:match(".*/([%d]+/.*mp3)")
-    audio:Play(relPath)
     play.playing=play.path
+    if playlistmode() then 
+        local pos=audio:SearchPodcast(relPath) 
+        if not pos then --Not found therefore is neither downloaded nor added already
+            download() 
+            audio:addtoPlaylist(relPath,playlist)
+        else
+            audio:Play(relPath,pos,playlist) 
+        end
+    else --Always clear and play ??
+        audio:Play(relPath,0)
+    end
+
     button:set_icon_name("media-playback-pause")
     local status=audio:Status()
     if status.volume then
@@ -219,7 +247,7 @@ function Podcast:Play()
     end
 end
 
-function Podcast:Forward()
+function Podcast:Next(auto)
     if not play.url then return end
     local url,box=nil,nil
     local exit = 0
@@ -228,12 +256,29 @@ function Podcast:Forward()
         url=box:get_name()
         if exit == 1 then 
             play.url=url
-            play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
             local elements=box:get_children()
             play.title=elements[1]:get_label()
             play.idpodcast=elements[1]:get_name()
+            if not playlistmode() then 
+                play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
+            else
+                local res=db:select("select idRSS from Podcasts where id="..play.idpodcast)
+                play.path=audioPath..res().."/".. play.url:match("([^/]+)$")
+            end
             LB:select_row(row)
-            self:Play()
+            if not playlistmode() then 
+                self:Play()
+            else 
+                local relPath=play.path:match(".*/([%d]+/.*mp3)")
+                local pos=audio:SearchPodcast(relPath) 
+                if not pos then --Not found therefore is neither downloaded nor added already
+                    download() 
+                    audio:addtoPlaylist(relPath,playlist)
+                else 
+                    titleSong:set_label(play.title)
+                    if not auto then audio:Next() end
+                end
+            end
             break
         end
         if play.url == url then exit = 1 end
@@ -250,12 +295,19 @@ function Podcast:Previous()
         if play.url == url then
             if pbox then
                 play.url=pbox:get_name()
-                play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
                 local elements=pbox:get_children()
                 play.title=elements[1]:get_label()
                 play.idpodcast=elements[1]:get_name()
+                if not playlistmode() then 
+                    play.path=audioPath..selectedRssId.."/".. play.url:match("([^/]+)$")
+                else
+                    local res=db:select("select idRSS from Podcasts where id="..play.idpodcast)
+                    play.path=audioPath..res().."/".. play.url:match("([^/]+)$")
+                end
                 LB:select_row(prow)
-                self:Play()
+                if not playlistmode() then self:Play()
+                else audio:Previous() end
+                titleSong:set_label(play.title)
             end
             break
         end
@@ -287,12 +339,18 @@ function Podcast:close()
     audio:close()
 end
 
+    
+
 function Podcast:UpdateBar()
     if audio:Playing() then 
         local status=audio:Status()
         local current=audio:CurrentSong()
         if current.Time then 
             audio:Update(current.file)
+            local relPath=play.path:match(".*/([%d]+/.*mp3)")
+            --Changed to next song on the playlist automaticaly
+            -- but not playing and changed to playlists and select one row
+            if current.file ~= relPath and playlistmode() then Podcast:Next(true) end
             local played=tonumber(status.elapsed)
             barSong:set_value(played/60)
             -- local total=tonumber(status.time:match(".*:(%d+)"))
@@ -313,5 +371,6 @@ function Podcast:MovePlaying()
         Audio:Seek(audio:Status().song,time)
     end
 end
+
 
 return Podcast

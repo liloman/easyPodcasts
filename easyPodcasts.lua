@@ -12,16 +12,23 @@ assert(builder:add_from_file((abDir..'ui/limpio.ui')))
 local window = builder.objects.mainWindow
 local Group=require("classes.Group")
 local Podcast=require("classes.Podcast")
-
+local Playlist=require("classes.Playlist")
 local group=Group:new()
-podcast=Podcast:new()
 
+--Global variables
+podcast=Podcast:new()
+playlist=Playlist:new()
 EASYPATH=os.getenv("HOME")..'/.config/easyPodcasts/'
 iconPath=EASYPATH..'icons/'
 audioPath=EASYPATH..'audio/'
 playlistsPath=EASYPATH..'playlists/'
 wget="/usr/bin/env wget -U 'firefox' "
+--play contains url,title,path,idpodcast,playing
+play={}
 
+function playlistmode()
+    return builder:get_object('toolbuttonPlaylist'):get_active() 
+end
 
 function updateProgressbar()
     podcast:UpdateBar()
@@ -58,10 +65,10 @@ end
 
 
 local button=builder:get_object('toolbuttonPlayPause')
-function button:on_clicked() podcast:Play() end
+function button:on_clicked() podcast:Play(playlist:getPlaylistSelected()) end
 
 local button=builder:get_object('toolbuttonForward')
-function button:on_clicked() podcast:Forward() end
+function button:on_clicked() podcast:Next() end
 
 local button=builder:get_object('toolbuttonPrevious')
 function button:on_clicked() podcast:Previous() end
@@ -74,6 +81,15 @@ function bar:on_value_changed()  podcast:ChangeVolume(self:get_value())  end
 
 local bar = builder:get_object('scaleSong')
 function bar:on_change_value()  podcast:MovePlaying()  end 
+
+local button=builder:get_object('toolbuttonPlaylist')
+function button:on_clicked() 
+    if self:get_active() then 
+        playlist:ShowPlaylists()
+    else
+        group:UpdateAll()
+    end
+end
 
 function window:on_destroy()
     Gtk.main_quit()
