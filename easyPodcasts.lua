@@ -23,16 +23,23 @@ iconPath=EASYPATH..'icons/'
 audioPath=EASYPATH..'audio/'
 playlistsPath=EASYPATH..'playlists/'
 wget="/usr/bin/env wget -U 'firefox' "
---play contains url,title,path,idpodcast,playing
-play={}
+playlistmode=false
 
-function playlistmode()
+function playlistActive()
     return builder:get_object('toolbuttonPlaylist'):get_active() 
 end
 
 function updateProgressbar()
-    podcast:UpdateBar()
+    if not playlistActive() and not playlistmode then podcast:UpdateBar()
+    else playlist:UpdateBar() end
     return true
+end
+
+function download(play)
+        print("wget "..play.url)
+        os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
+        --Let's wait some time to download something
+        socket.sleep(10)
 end
 
 --each 2 seconds
@@ -46,10 +53,16 @@ local button=builder:get_object('toolbuttonDelGroup')
 function button:on_clicked() group:DelGroup() end
 
 local button=builder:get_object('toolbuttonAddRSS')
-function button:on_clicked() group:AddRSS() end
+function button:on_clicked() 
+    if not playlistmode() then group:AddRSS()
+    else playlist:AddPlaylist() end
+end
 
 local button=builder:get_object('toolbuttonDelRSS')
-function button:on_clicked() group:DelRSS() end
+function button:on_clicked() 
+    if not playlistmode() then group:DelRSS() 
+    else playlist:DelPlaylist() end
+end
 
 local button=builder:get_object('switchUpdateRSS')
 function button:on_state_set() 
@@ -65,13 +78,29 @@ end
 
 
 local button=builder:get_object('toolbuttonPlayPause')
-function button:on_clicked() podcast:Play(playlist:getPlaylistSelected()) end
+function button:on_clicked() 
+    if not playlistActive() then
+        podcast:Play()
+        playlist:ResetPlay()
+        playlistmode=false
+    else 
+        playlist:Play()
+        podcast:ResetPlay()
+        playlistmode=true
+    end
+end
 
-local button=builder:get_object('toolbuttonForward')
-function button:on_clicked() podcast:Next() end
+local button=builder:get_object('toolbuttonNext')
+function button:on_clicked() 
+    if not playlistmode then podcast:Next()
+    else playlist:Next() end
+end
 
 local button=builder:get_object('toolbuttonPrevious')
-function button:on_clicked() podcast:Previous() end
+function button:on_clicked() 
+    if not playlistmode then podcast:Previous()
+    else playlist:Previous() end
+end
 
 local button=builder:get_object('toggletoolbuttonProgramas')
 function button:on_toggled()  builder:get_object('boxRSS'):set_visible(self:get_active()) end 
@@ -84,9 +113,19 @@ function bar:on_change_value()  podcast:MovePlaying()  end
 
 local button=builder:get_object('toolbuttonPlaylist')
 function button:on_clicked() 
+    local b={"toolbuttonAddGroup", "toolbuttonDelGroup"}
+    local bTooltip={"Add", "Del"}
     if self:get_active() then 
+        for _,v in pairs(b) do builder:get_object(v):set_visible(false) end
+        for _,v in pairs(bTooltip) do 
+            builder:get_object("toolbutton"..v.."RSS"):set_tooltip_text(v.." Playlist") 
+        end
         playlist:ShowPlaylists()
     else
+        for _,v in pairs(b) do builder:get_object(v):set_visible(true) end
+        for _,v in pairs(bTooltip) do 
+            builder:get_object("toolbutton"..v.."RSS"):set_tooltip_text(v.." RSS") 
+        end
         group:UpdateAll()
     end
 end

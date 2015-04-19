@@ -2,6 +2,29 @@
 <!-- Generated with glade 3.18.3 -->
 <interface>
   <requires lib="gtk+" version="3.12"/>
+  <object class="GtkMenu" id="menuAddToPlaylist">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="tearoff_title">ooo oooo oo</property>
+    <child>
+      <object class="GtkMenuItem" id="menuitem1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">hhjj jhj h</property>
+        <property name="label" translatable="yes">menuitem1</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">8787488</property>
+        <property name="label" translatable="yes">menuitem2</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkAdjustment" id="progressAdjust">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
@@ -182,7 +205,7 @@
                       <object class="GtkToolButton" id="toolbuttonAddRSS">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Add Podcast</property>
+                        <property name="tooltip_text" translatable="yes">Add RSS</property>
                         <property name="label" translatable="yes">Add RSS</property>
                         <property name="use_underline">True</property>
                         <property name="icon_name">list-add</property>
@@ -196,7 +219,7 @@
                       <object class="GtkToolButton" id="toolbuttonDelRSS">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Delete Podcast</property>
+                        <property name="tooltip_text" translatable="yes">Delete RSS</property>
                         <property name="label" translatable="yes">Delete RSS</property>
                         <property name="use_underline">True</property>
                         <property name="icon_name">list-remove</property>
@@ -418,11 +441,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToolButton" id="toolbuttonForward">
+                  <object class="GtkToolButton" id="toolbuttonNext">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">Forward</property>
-                    <property name="label" translatable="yes">Forward</property>
+                    <property name="label" translatable="yes">Next</property>
                     <property name="use_underline">True</property>
                     <property name="icon_name">gtk-media-forward</property>
                   </object>

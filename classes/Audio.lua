@@ -8,7 +8,7 @@ local selected=""
 Audio=Class("Audio")
 
 
-local function loadPlaylist(name)
+function Audio:loadPlaylist(name)
     player:load(name)
 end
 
@@ -20,24 +20,28 @@ function Audio:initialize(name)
     self:emptyPlaylist(defaultPlaylist)
 end
 
-function Audio:PlayDownloading(podcast)
-    self:addtoPlaylist(podcast,selected)
+function Audio:PlayDownloading(podcast,playlist)
+    self:addtoPlaylist(podcast,playlist or defaultPlaylist)
     player:play(0)
 end
 
 function Audio:Play(podcast,pos,playlist)
     print("PLAYYY")
     local playlist= playlist or defaultPlaylist
+    local pos=self:SearchPodcast(podcast) 
 
     -- Clear, add and play just that podcast
     if playlist == defaultPlaylist then 
         print("default playlist")
         self:emptyPlaylist(playlist)
-        self:addtoPlaylist(podcast,playlist)
+        while not pos do
+            self:addtoPlaylist(podcast,playlist)
+            pos=self:SearchPodcast(podcast) 
+        end
     end
 
     if selected ~= playlist then 
-        loadPlaylist(playlist) 
+        self:loadPlaylist(playlist) 
         selected = playlist
     end
     player:play(pos)
