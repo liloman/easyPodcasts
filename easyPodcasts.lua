@@ -54,13 +54,13 @@ function button:on_clicked() group:DelGroup() end
 
 local button=builder:get_object('toolbuttonAddRSS')
 function button:on_clicked() 
-    if not playlistmode() then group:AddRSS()
+    if not playlistActive() then group:AddRSS()
     else playlist:AddPlaylist() end
 end
 
 local button=builder:get_object('toolbuttonDelRSS')
 function button:on_clicked() 
-    if not playlistmode() then group:DelRSS() 
+    if not playlistActive() then group:DelRSS() 
     else playlist:DelPlaylist() end
 end
 
