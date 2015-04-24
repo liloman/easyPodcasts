@@ -4,6 +4,7 @@ Group=Class("Group")
 --Private variable
 local listRSSSelectedRow=nil
 local LB=builder:get_object('listboxRSS')
+local selectedFirst=false
 
 function Group:initialize(name)
     self.name=name
@@ -30,8 +31,14 @@ function Group:Update(groupName,rss)
         listLocal=Gtk.ListBox()
         group=Gtk.Expander()
         group:set_label(groupName)
+        group:set_expanded(true)
+        group:set_margin_left(5)
+        group:set_margin_right(5)
+        group:set_margin_top(5)
+        group:set_margin_bottom(5)
         group:add(listLocal)
         listRSSSelectedRow=listLocal
+
         function group:on_activate() 
             print("activate"..self:get_label()) 
             listRSSSelectedRow=self:get_child() 
@@ -47,6 +54,10 @@ function Group:Update(groupName,rss)
     --Create its RSS
     for rss,id in db:select("SELECT rss,id from listRSSGroups where groupName='"..groupName.."'") do
         self:AddRSSToLB(rss,id)
+    end
+    if not selectedFirst then 
+        LB:select_row(listRSSSelectedRow:get_children()[1])
+        selectedFirst=true
     end
 end
 

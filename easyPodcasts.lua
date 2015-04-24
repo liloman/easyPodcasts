@@ -76,9 +76,7 @@ function button:on_state_set()
     end 
 end
 
-
-local button=builder:get_object('toolbuttonPlayPause')
-function button:on_clicked() 
+local  function play()
     if not playlistActive() then
         podcast:Play()
         playlist:ResetPlay()
@@ -88,6 +86,11 @@ function button:on_clicked()
         podcast:ResetPlay()
         playlistmode=true
     end
+end
+
+local button=builder:get_object('toolbuttonPlayPause')
+function button:on_clicked() 
+    play()
 end
 
 local button=builder:get_object('toolbuttonNext')
@@ -130,11 +133,26 @@ function button:on_clicked()
     end
 end
 
+function window:on_key_press_event(event)
+    local Gdk = lgi.Gdk
+    if event.keyval == Gdk.KEY_space then   
+        play()
+    end
+
+    if event.keyval == Gdk.KEY_Right then   
+        local barSong = builder:get_object('progressAdjust')
+        podcast:MovePlaying(0.10,1)
+    end
+
+    print("hola "..event.keyval.." y "..Gdk.KEY_Right)
+end
+
 function window:on_destroy()
     Gtk.main_quit()
     db:close()
     podcast:close()
 end
+
 
 window:show_all()
 Gtk.main()
