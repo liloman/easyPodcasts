@@ -143,6 +143,10 @@ function Podcast:ShowSelectedRSS(idRSS)
     for id,title,link,desc in db:select(sql) do
         self:AddPodcastToLB(id,title,link,desc,false)
     end
+    local first=LB:get_children()[1]
+    LB:select_row(first)
+    first:set_can_focus(true)
+    first:grab_focus()
 end
 
 function Podcast:ParsePodcasts()
@@ -184,7 +188,7 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
     buffer:set_text(summary,string.len(summary))
     local desc=Gtk.TextView()
     desc:set_buffer(buffer)
-    desc:set_wrap_mode(1)
+    desc:set_wrap_mode(2)
     function desc:on_populate_popup(menu)
         --Remove all stock entries menu
         for _,child in ipairs(menu:get_children()) do child:destroy() end
@@ -342,9 +346,14 @@ function Podcast:ChangeVolume(value)
     Audio:ChangeVolume(value)
 end
 
-function Podcast:MovePlaying()
+function Podcast:MovePlaying(seek,position)
     if audio:Playing() then 
-        local time=barSong:get_value()*60
+        local time=barSong:get_value()*60 
+        if seek then 
+            if position then time = time + seek 
+            else time = time - seek end
+            barSong:set_value(time) 
+        end
         Audio:Seek(audio:Status().song,time)
     end
 end
