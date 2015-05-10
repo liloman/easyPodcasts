@@ -189,6 +189,9 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
     local desc=Gtk.TextView()
     desc:set_buffer(buffer)
     desc:set_wrap_mode(2)
+    desc:set_cursor_visible(false)
+    desc:set_editable(false)
+    desc:set_accepts_tab(false)
     function desc:on_populate_popup(menu)
         --Remove all stock entries menu
         for _,child in ipairs(menu:get_children()) do child:destroy() end
@@ -348,13 +351,15 @@ end
 
 function Podcast:MovePlaying(seek,position)
     if audio:Playing() then 
-        local time=barSong:get_value()*60 
         if seek then 
-            if position then time = time + seek 
+            local time=tonumber(audio:Status().elapsed)
+            if position == 1 then time = time + seek 
             else time = time - seek end
-            barSong:set_value(time) 
+            audio:Seek(time)
+        else
+            local time=barSong:get_value()*60
+            audio:Seek(time)
         end
-        Audio:Seek(audio:Status().song,time)
     end
 end
 

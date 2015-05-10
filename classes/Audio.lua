@@ -28,7 +28,7 @@ end
 function Audio:Play(podcast,pos,playlist)
     print("PLAYYY")
     local playlist= playlist or defaultPlaylist
-    local pos=self:SearchPodcast(podcast) 
+        local pos=self:SearchPodcast(podcast) 
 
     -- Clear, add and play just that podcast
     if playlist == defaultPlaylist then 
@@ -107,8 +107,8 @@ function Audio:ChangeVolume(value)
     return player:set_vol(value)
 end
 
-function Audio:Seek(pos,time)
-    return player:seek(pos,time)
+function Audio:Seek(time)
+    return player:seek(self:Status().song,time)
 end
 
 return Audio

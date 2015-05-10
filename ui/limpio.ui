@@ -304,7 +304,8 @@
                             <child>
                               <object class="GtkTextView" id="textviewHeaderPodcasts">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="sensitive">False</property>
+                                <property name="can_focus">False</property>
                                 <property name="editable">False</property>
                                 <property name="wrap_mode">word</property>
                                 <property name="cursor_visible">False</property>
@@ -482,7 +483,7 @@
                 <child>
                   <object class="GtkScale" id="scaleSong">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <property name="adjustment">progressAdjust</property>
                     <property name="round_digits">2</property>
                     <property name="digits">2</property>

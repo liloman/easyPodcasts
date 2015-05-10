@@ -56,8 +56,11 @@ function Group:Update(groupName,rss)
         self:AddRSSToLB(rss,id)
     end
     if not selectedFirst then 
-        LB:select_row(listRSSSelectedRow:get_children()[1])
-        selectedFirst=true
+        listRSSSelectedRow=LB:get_children()[1]
+        if listRSSSelectedRow then 
+            LB:select_row(listRSSSelectedRow)
+            selectedFirst=true
+        end
     end
 end
 

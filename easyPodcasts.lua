@@ -36,14 +36,15 @@ function updateProgressbar()
 end
 
 function download(play)
-        print("wget "..play.url)
-        os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
-        --Let's wait some time to download something
-        socket.sleep(10)
+    print("wget "..play.url)
+    os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
+    db:sql("update Podcasts set downloaded=1 where id="..play.idpodcast)
+    --Let's wait some time to download something
+    socket.sleep(10)
 end
 
---each 2 seconds
-glib.timeout_add_seconds(0,2,updateProgressbar)
+--each 3 seconds
+glib.timeout_add_seconds(0,3,updateProgressbar)
 
 
 local button=builder:get_object('toolbuttonAddGroup')
@@ -113,6 +114,8 @@ function bar:on_value_changed()  podcast:ChangeVolume(self:get_value())  end
 
 local bar = builder:get_object('scaleSong')
 function bar:on_change_value()  podcast:MovePlaying()  end 
+-- Problems with updatebar if activated
+-- function bar:on_value_changed()  podcast:MovePlaying()  end 
 
 local button=builder:get_object('toolbuttonPlaylist')
 function button:on_clicked() 
@@ -140,11 +143,25 @@ function window:on_key_press_event(event)
     end
 
     if event.keyval == Gdk.KEY_Right then   
-        local barSong = builder:get_object('progressAdjust')
-        podcast:MovePlaying(0.10,1)
+        podcast:MovePlaying(20,1)
     end
 
-    print("hola "..event.keyval.." y "..Gdk.KEY_Right)
+    if event.keyval == Gdk.KEY_Left then   
+        podcast:MovePlaying(20,0)
+    end
+
+    if event.keyval == Gdk.KEY_Tab then   
+        print("TABS")
+    end
+
+    if event.keyval == Gdk.KEY_u then   
+        print("u")
+        local button=builder:get_object('switchUpdateRSS')
+        button:set_active(not button:get_active())
+
+    end
+
+    return false
 end
 
 function window:on_destroy()
