@@ -111,6 +111,7 @@ function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
     local day,tmonth,year=_date:match(regDate)
     local date=year.."-"..MON[tmonth].."-"..day
     local ref = _url:match( "([^/]+)%.mp3" )
+    if not ref then return end
     local idrss=selectedRssId
     local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
     local title=db:escape(_title)
