@@ -106,17 +106,19 @@ function Podcast:initialize(name)
 end
 
 function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
-    local MON={Jan=1,Feb=2,Mar=3,Apr=4,May=5,Jun=6,Jul=7,Aug=8,Sep=9,Oct=10,Nov=11,Dec=12}
+    local MON={Jan=01,Feb=02,Mar=03,Apr=04,May=05,Jun=06,Jul=07,Aug=08,Sep=09,Oct=10,Nov=11,Dec=12}
     local regDate= ".* (%d+) (%a+) (%d+) .*"
     local day,tmonth,year=_date:match(regDate)
     local date=year.."-"..MON[tmonth].."-"..day
     local ref = _url:match( "([^/]+)%.mp3" )
     local idrss=selectedRssId
-    local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
     local title=db:escape(_title)
-    if not res() then
-        db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0,'"..date.."')")
-        local res=db:select("SELECT max(id) from Podcasts")
+    if ref and idrss then 
+        local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
+        if not res() then
+            db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0,'"..date.."')")
+        end
+        res=db:select("SELECT max(id) from Podcasts")
         self:AddPodcastToLB(res(),title,_url,summary,bAddFirst)
     end
 
@@ -125,11 +127,12 @@ end
 
 function Podcast:ShowSelectedRSS(idRSS)
     if not idRSS then return end
-    boxHeader:set_visible(true)
-    selectedRssId=idRSS
     --Reset everything
     imageHeader:clear()
     bufferHeader:set_text('',0)
+    switchHeader:set_active(false)
+    boxHeader:set_visible(true)
+    selectedRssId=idRSS
     for _,child in ipairs(LB:get_children()) do child:destroy() end
 
     local res=db:select("SELECT desc,img,autoupdate from RSS where id="..idRSS) 
@@ -144,9 +147,11 @@ function Podcast:ShowSelectedRSS(idRSS)
         self:AddPodcastToLB(id,title,link,desc,false)
     end
     local first=LB:get_children()[1]
-    LB:select_row(first)
-    first:set_can_focus(true)
-    first:grab_focus()
+    if first then 
+        LB:select_row(first)
+        first:set_can_focus(true)
+        first:grab_focus()
+    end
 end
 
 function Podcast:ParsePodcasts()
@@ -159,6 +164,7 @@ function Podcast:ParsePodcasts()
     os.execute(wget.." "..url.." -O /tmp/file.rss -o /tmp/wgetparse.log")
     self:ParsePodcast(callbacksChannel)
     self:ParsePodcast(callbacksItems)
+    self:ShowSelectedRSS(selectedRssId)
 end
 
 function Podcast:ParsePodcast(callbacks)

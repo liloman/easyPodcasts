@@ -67,6 +67,7 @@ end
 
 local button=builder:get_object('switchUpdateRSS')
 function button:on_state_set() 
+    print("update state...")
     local selected=podcast:GetSelected()
     if not selected then return end
     if not button.state then
