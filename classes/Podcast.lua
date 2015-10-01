@@ -106,7 +106,7 @@ function Podcast:initialize(name)
 end
 
 function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
-    local MON={Jan=01,Feb=02,Mar=03,Apr=04,May=05,Jun=06,Jul=07,Aug=08,Sep=09,Oct=10,Nov=11,Dec=12}
+    local MON={Jan="01",Feb="02",Mar="03",Apr="04",May="05",Jun="06",Jul="07",Aug="08",Sep="09",Oct=10,Nov=11,Dec=12}
     local regDate= ".* (%d+) (%a+) (%d+) .*"
     local day,tmonth,year=_date:match(regDate)
     local date=year.."-"..MON[tmonth].."-"..day
@@ -130,7 +130,7 @@ function Podcast:ShowSelectedRSS(idRSS)
     --Reset everything
     imageHeader:clear()
     bufferHeader:set_text('',0)
-    switchHeader:set_active(false)
+    --switchHeader:set_active(false) --it will reset to false on double click..
     boxHeader:set_visible(true)
     selectedRssId=idRSS
     for _,child in ipairs(LB:get_children()) do child:destroy() end
@@ -164,7 +164,6 @@ function Podcast:ParsePodcasts()
     os.execute(wget.." "..url.." -O /tmp/file.rss -o /tmp/wgetparse.log")
     self:ParsePodcast(callbacksChannel)
     self:ParsePodcast(callbacksItems)
-    self:ShowSelectedRSS(selectedRssId)
 end
 
 function Podcast:ParsePodcast(callbacks)
