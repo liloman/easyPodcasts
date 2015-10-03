@@ -118,9 +118,9 @@ function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
         local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
         if not res() then
             db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0,'"..date.."')")
+            res=db:select("SELECT max(id) from Podcasts")
+            self:AddPodcastToLB(res(),title,_url,summary,bAddFirst,0)
         end
-        res=db:select("SELECT max(id) from Podcasts")
-        self:AddPodcastToLB(res(),title,_url,summary,bAddFirst)
     end
 
 end
@@ -143,9 +143,9 @@ function Podcast:ShowSelectedRSS(idRSS)
         switchHeader:set_active(auto==1)
         scaleImage(img)
     end
-    local sql="SELECT id,title,url,desc from Podcasts where idRSS="..idRSS.." order by date desc"
-    for id,title,link,desc in db:select(sql) do
-        self:AddPodcastToLB(id,title,link,desc,false)
+    local sql="SELECT id,title,url,desc,listened from Podcasts where idRSS="..idRSS.." order by date desc"
+    for id,title,link,desc,listened in db:select(sql) do
+        self:AddPodcastToLB(id,title,link,desc,false,listened)
     end
     local first=LB:get_children()[1]
     if first then 
@@ -184,7 +184,7 @@ function Podcast:ParsePodcast(callbacks)
 end
 
 
-function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
+function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first,listened)
     local hbox=Gtk.VBox()
     hbox:set_name(link)
     local ltitle=Gtk.Label()
@@ -198,14 +198,56 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
     desc:set_cursor_visible(false)
     desc:set_editable(false)
     desc:set_accepts_tab(false)
+    if listened > 0 then
+        desc:override_background_color('NORMAL', Gdk.RGBA { red = 10, green = 0, blue = 1, alpha = 1 } )
+    end
+
+    local lastime=0
+    --Click events on each podcast
+    function desc:on_button_press_event(event)
+        --left click
+        if event.button == 1 then   
+            --No other way to detect double click??
+            if event.time-lastime<20 then
+                Podcast:Play(true)
+            end
+            lastime=event.time
+        end
+
+        return false
+    end
+
     function desc:on_populate_popup(menu)
         --Remove all stock entries menu
         for _,child in ipairs(menu:get_children()) do child:destroy() end
+        local item=Gtk.MenuItem()
+        item:set_visible(true)
+        item:set_label("Download again")
+        function item:on_activate() 
+            print("marked for download again ->"..title.." ->"..idpodcast)
+            db:sql("update Podcasts set downloaded=0 where id="..idpodcast)
+        end
+        menu:append(item)
+        local item=Gtk.MenuItem()
+        item:set_visible(true)
+        item:set_label("Delete file")
+        function item:on_activate() 
+            local res=db:select("select ref from Podcasts where id="..idpodcast)
+            local ref=res()
+            local path=audioPath..selectedRssId.."/"..ref..".mp3"
+            os.execute("rm -f "..path)
+            print("deleted file ->"..title.." in "..path)
+        end
+        menu:append(item)
+        local item=Gtk.MenuItem()
+        item:set_visible(true)
+        item:set_label("Playlists")
+        menu:append(item)
 
         for id,name in db:select("select id,name from Playlists") do
             local item=Gtk.MenuItem()
             item:set_visible(true)
-            item:set_label(name)
+            item:set_label("Add to playlist:"..name)
             item:set_name("idplaylist_"..id)
             function item:on_activate() 
                 local idpl=string.sub(self:get_name(),string.len("idplaylist_")+1)
@@ -225,25 +267,37 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first)
 
 end
 
-function Podcast:Play()
+function Podcast:Play(otherPodcast)
     print("play podcast")
     if not play.url then return end
     local button=builder:get_object('toolbuttonPlayPause')
-    if play.playing and play.path==play.playing then 
-        local relPath=play.path:match(".*/([%d]+/.*mp3)")
-        --If it's not added cause downloading to slow
-        if not audio:CurrentSong().Time then audio:PlayDownloading(relPath) end
-        --Maybe even now not playing already so wait more 
+    --If clicked pause/play or pressed scape
+    if not otherPodcast then 
         if not audio:CurrentSong().Time then return end
         if button:get_icon_name() == "media-playback-start" then
             button:set_icon_name("media-playback-pause") 
         else button:set_icon_name("media-playback-start") end
         --Toggle between Play and Pause
         audio:TogglePause()
-        print("sale de ajuste del boton")
+        return 
+    end
+    --If it is the selected is the playing one...
+    if play.playing and play.path==play.playing then 
+        local relPath=play.path:match(".*/([%d]+/.*mp3)")
+        --If it's not added cause downloading to slow
+        if not audio:CurrentSong().Time then audio:PlayDownloading(relPath) end
+        --Maybe even now is not playing so wait more 
+        if not audio:CurrentSong().Time then return end
+        if button:get_icon_name() == "media-playback-start" then
+            button:set_icon_name("media-playback-pause") 
+        else button:set_icon_name("media-playback-start") end
+        --Toggle between Play and Pause
+        audio:TogglePause()
+        print("Sale de play ")
         return
     end 
-    print("play2")
+
+    print("Play other podcast then")
     local res=db:select("select listened,downloaded from Podcasts where id="..play.idpodcast)
     local listened,downloaded=res()
     local listened = listened + 1

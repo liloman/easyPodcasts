@@ -4,6 +4,7 @@ package.path = package.path .. ';'..abDir..'?.lua;'
 local lgi = require 'lgi'
 local assert = lgi.assert
 Gtk = lgi.Gtk
+Gdk = lgi.Gdk
 local glib = lgi.GLib
 db=require("classes.db")
 
@@ -36,8 +37,8 @@ function updateProgressbar()
 end
 
 function download(play)
-    print("wget "..play.url)
-    os.execute(wget.." "..play.url.." -nc -O "..play.path.." -o "..os.tmpname().."-wget.log &")
+    print("wgetting... "..play.url)
+    os.execute(wget.." "..play.url.." -p -O "..play.path.." -o /tmp/downloaded-wget.log &")
     db:sql("update Podcasts set downloaded=1 where id="..play.idpodcast)
     --Let's wait some time to download something
     socket.sleep(10)
@@ -78,9 +79,9 @@ function button:on_state_set()
     end 
 end
 
-local  function play()
+local  function play(new)
     if not playlistActive() then
-        podcast:Play()
+        podcast:Play(new)
         playlist:ResetPlay()
         playlistmode=false
     else 
@@ -92,7 +93,7 @@ end
 
 local button=builder:get_object('toolbuttonPlayPause')
 function button:on_clicked() 
-    play()
+    play(false)
 end
 
 local button=builder:get_object('toolbuttonNext')
@@ -138,9 +139,12 @@ function button:on_clicked()
 end
 
 function window:on_key_press_event(event)
-    local Gdk = lgi.Gdk
+    if event.keyval == Gdk.KEY_KP_Enter or event.keyval==Gdk.KEY_Return then   
+        play(true)
+    end
+
     if event.keyval == Gdk.KEY_space then   
-        play()
+        play(false)
     end
 
     if event.keyval == Gdk.KEY_Right then   
@@ -159,7 +163,6 @@ function window:on_key_press_event(event)
         print("u")
         local button=builder:get_object('switchUpdateRSS')
         button:set_active(not button:get_active())
-
     end
 
     return false
