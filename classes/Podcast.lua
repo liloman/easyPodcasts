@@ -48,10 +48,10 @@ callbacksItems = {
         if tags[name] or name == "itunes:summary" then 
             callbacksItems.CharacterData = function (parser,string)
                 if string=="" then return end
-                if name == "title" then title=string end
-                if name == "link" then link=string  end
-                if name == "pubDate" then date=string  end
-                if name == "itunes:summary" then summary=db:escape(string) end
+                if name == "title" then  title=string end
+                if name == "link" then  link=string  end
+                if name == "pubDate" then  date=string  end
+                if name == "itunes:summary" then  summary=db:escape(string) end
             end
         end
     end,
@@ -117,9 +117,10 @@ function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
     if ref and idrss then 
         local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
         if not res() then
-            db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0,'"..date.."')")
+            --print("insertPodcast ".._summary.." y url "..url.." title"..title)
+            db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','".._summary.."',0,0,'".._url.."',0,'"..date.."')")
             res=db:select("SELECT max(id) from Podcasts")
-            self:AddPodcastToLB(res(),title,_url,summary,bAddFirst,0)
+            self:AddPodcastToLB(res(),title,_url,_summary,bAddFirst,0)
         end
     end
 
