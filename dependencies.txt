@@ -1,0 +1,5 @@
+lua
+lua-sql-sqlite
+lua-socket
+lua-lgi
+lua-expat

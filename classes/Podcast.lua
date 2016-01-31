@@ -20,6 +20,7 @@ local bufferHeader=builder:get_object('textbufferHeaderPodcasts')
 local switchHeader=builder:get_object('switchUpdateRSS')
 local imageHeader=builder:get_object('imageHeaderPodcasts')
 local menuAddToPlaylist=builder:get_object('menuAddToPlaylist')
+local ratingPlaying=builder:get_object('ratingPlayingScale')
 local selectedRssId=nil
 --play contains url,title,path,idpodcast,playing
 local play={}
@@ -117,8 +118,7 @@ function Podcast:InsertPodcast(_date,_title,_link,_url,_summary)
     if ref and idrss then 
         local res=db:select("select ref from Podcasts where ref='"..ref.."' and idRSS="..idrss)
         if not res() then
-            --print("insertPodcast ".._summary.." y url "..url.." title"..title)
-            db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,ranking,date) values ('"..ref.."',"..idrss..",'"..title.."','".._summary.."',0,0,'".._url.."',0,'"..date.."')")
+            db:sql("insert into Podcasts(ref,idrss,title,desc,listened,downloaded,url,rating,date) values ('"..ref.."',"..idrss..",'"..title.."','"..summary.."',0,0,'".._url.."',0,'"..date.."')")
             res=db:select("SELECT max(id) from Podcasts")
             self:AddPodcastToLB(res(),title,_url,_summary,bAddFirst,0)
         end
@@ -186,8 +186,8 @@ end
 
 
 function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first,listened)
-    local hbox=Gtk.VBox()
-    hbox:set_name(link)
+    local vbox=Gtk.VBox()
+    vbox:set_name(link)
     local ltitle=Gtk.Label()
     ltitle:set_label(title)
     ltitle:set_name(idpodcast)
@@ -259,11 +259,27 @@ function Podcast:AddPodcastToLB(idpodcast,title,link,summary,first,listened)
             menu:append(item)
         end
     end
+    --Box ratings
+    local hbox=Gtk.HBox()
+    local lrating=Gtk.Label()
+    lrating:set_label("Rating")
+    local scaleRating=Gtk.Scale()
+    local res=db:select("select rating from Podcasts where id="..idpodcast)
+    scaleRating:set_value_pos(1)
+    scaleRating:set_digits(0)
+    function scaleRating:on_change_value()
+        print("si??"..self:get_value())
+    end
 
-    hbox:pack_start(ltitle, false, false, 0)
-    hbox:pack_start(desc, false, false, 0)
-    if first then LB:insert(hbox,0)
-    else LB:insert(hbox,-1) end
+
+    hbox:pack_start(lrating, false, false, 0)
+    hbox:pack_start(scaleRating, true, true, 0)
+
+    vbox:pack_start(ltitle, false, false, 0)
+    vbox:pack_start(desc, true, true, 0)
+    vbox:pack_start(hbox, false, false, 0)
+    if first then LB:insert(vbox,0)
+    else LB:insert(vbox,-1) end
     LB:show_all()
 
 end
@@ -272,37 +288,34 @@ function Podcast:Play(otherPodcast)
     print("play podcast")
     if not play.url then return end
     local button=builder:get_object('toolbuttonPlayPause')
-    --If clicked pause/play or pressed scape
-    if not otherPodcast then 
-        if not audio:CurrentSong().Time then return end
-        if button:get_icon_name() == "media-playback-start" then
-            button:set_icon_name("media-playback-pause") 
-        else button:set_icon_name("media-playback-start") end
-        --Toggle between Play and Pause
-        audio:TogglePause()
-        return 
+
+    if not audio:CurrentSong().Time and not otherPodcast then return end
+    if button:get_icon_name() == "media-playback-start" then
+        button:set_icon_name("media-playback-pause") 
+        updateStatusBar("Playing podcast")
+    else 
+        button:set_icon_name("media-playback-start") 
+        updateStatusBar("Paused")
     end
-    --If it is the selected is the playing one...
+    --Toggle between Play and Pause
+    audio:TogglePause()
+    --If clicked pause/play or pressed space
+    if not otherPodcast then return end
+
+    --If the selected podcast is the playing one...
     if play.playing and play.path==play.playing then 
         local relPath=play.path:match(".*/([%d]+/.*mp3)")
         --If it's not added cause downloading to slow
         if not audio:CurrentSong().Time then audio:PlayDownloading(relPath) end
-        --Maybe even now is not playing so wait more 
-        if not audio:CurrentSong().Time then return end
-        if button:get_icon_name() == "media-playback-start" then
-            button:set_icon_name("media-playback-pause") 
-        else button:set_icon_name("media-playback-start") end
-        --Toggle between Play and Pause
-        audio:TogglePause()
-        print("Sale de play ")
         return
     end 
 
     print("Play other podcast then")
-    local res=db:select("select listened,downloaded from Podcasts where id="..play.idpodcast)
-    local listened,downloaded=res()
+    local res=db:select("select rating,listened,downloaded from Podcasts where id="..play.idpodcast)
+    local rating,listened,downloaded=res()
     local listened = listened + 1
     titleSong:set_label(play.title)
+    ratingPlaying:set_value(rating)
     db:sql("update Podcasts set listened="..listened.." where id="..play.idpodcast)
     if downloaded==0 then download(play) end
     local relPath=play.path:match(".*/([%d]+/.*mp3)")

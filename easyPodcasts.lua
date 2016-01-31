@@ -26,6 +26,11 @@ playlistsPath=EASYPATH..'playlists/'
 wget="/usr/bin/env wget -U 'firefox' "
 playlistmode=false
 
+function updateStatusBar(msg)
+    statusbar:pop(0)
+    statusbar:push(0,msg)
+end
+
 function playlistActive()
     return builder:get_object('toolbuttonPlaylist'):get_active() 
 end
@@ -40,6 +45,7 @@ function download(play)
     print("wgetting... "..play.url)
     os.execute(wget.." "..play.url.." -p -O "..play.path.." -o /tmp/downloaded-wget.log &")
     db:sql("update Podcasts set downloaded=1 where id="..play.idpodcast)
+    updateStatusBar("Downloading "..play.path)
     --Let's wait some time to download something
     socket.sleep(10)
 end
@@ -47,6 +53,9 @@ end
 --each 3 seconds
 glib.timeout_add_seconds(0,3,updateProgressbar)
 
+
+statusbar=builder:get_object('statusbar')
+statusbar:push(0,"Started")
 
 local button=builder:get_object('toolbuttonAddGroup')
 function button:on_clicked() group:AddGroup() end
@@ -114,10 +123,10 @@ function button:on_toggled()  builder:get_object('boxRSS'):set_visible(self:get_
 local bar=builder:get_object('volumebutton')
 function bar:on_value_changed()  podcast:ChangeVolume(self:get_value())  end 
 
-local bar = builder:get_object('scaleSong')
-function bar:on_change_value()  podcast:MovePlaying()  end 
+local barSongs = builder:get_object('scaleSong')
+function barSongs:on_change_value()  podcast:MovePlaying()  end 
 -- Problems with updatebar if activated
--- function bar:on_value_changed()  podcast:MovePlaying()  end 
+-- function barSongs:on_value_changed()  podcast:MovePlaying()  end 
 
 local button=builder:get_object('toolbuttonPlaylist')
 function button:on_clicked() 

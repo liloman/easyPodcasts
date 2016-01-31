@@ -37,8 +37,8 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkWindow" id="mainWindow">
-    <property name="width_request">769</property>
-    <property name="height_request">430</property>
+    <property name="width_request">860</property>
+    <property name="height_request">530</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">easyPodcasts</property>
     <property name="window_position">center</property>
@@ -369,7 +369,7 @@
                           </object>
                           <packing>
                             <property name="expand">False</property>
-                            <property name="fill">True</property>
+                            <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -492,6 +492,48 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="boxRatingPlaying">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="double_buffered">False</property>
+                    <child>
+                      <object class="GtkLabel" id="label2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Rating</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
+                    </child>
+                    <child>
+                      <object class="GtkScale" id="ratingPlayingScale">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="fill_level">3</property>
+                        <property name="round_digits">0</property>
+                        <property name="draw_value">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
