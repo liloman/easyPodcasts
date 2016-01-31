@@ -6,6 +6,8 @@ Long (paced and projected) personal project for a X podcast player in GTK.
 
 So yes, yet another music player for linux, but this is just mine. :)
 
+![Screenshot with new glade](images/screenshot.png)
+
 ###TODO
 
 - [ ] Rework with FSM and luaproc
